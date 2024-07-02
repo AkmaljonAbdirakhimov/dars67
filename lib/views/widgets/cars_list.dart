@@ -1,6 +1,7 @@
 import 'package:dars67/controllers/cars_controller.dart';
 import 'package:dars67/models/car.dart';
 import 'package:dars67/utils/helpers.dart';
+import 'package:dars67/views/widgets/add_car.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -13,41 +14,6 @@ class CarsList extends StatefulWidget {
 
 class _CarsListState extends State<CarsList> {
   final nameController = TextEditingController();
-
-  void editCar(Car car) {
-    nameController.text = car.name;
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          title: const Text("O'zgaritish"),
-          content: TextField(
-            controller: nameController,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: "Mashina nomi",
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text("Bekor Qilish"),
-            ),
-            FilledButton(
-              onPressed: () async {
-                final carsController = context.read<CarsController>();
-                carsController.editCar(car.id, nameController.text);
-                Navigator.pop(context);
-              },
-              child: const Text("Saqlash"),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   @override
   void dispose() {
@@ -87,18 +53,62 @@ class _CarsListState extends State<CarsList> {
                   itemCount: cars.length,
                   itemBuilder: (ctx, index) {
                     final car = Car.fromMap(cars[index]);
-                    return ListTile(
-                      onTap: () {
-                        editCar(car);
-                      },
-                      title: Text(car.name),
-                      trailing: IconButton(
-                        onPressed: () async {
-                          Helpers.showProgressDialog(context);
-                          await carsController.deleteCar(car.id);
-                          Navigator.pop(context);
-                        },
-                        icon: const Icon(Icons.delete),
+                    return Card(
+                      child: Column(
+                        children: [
+                          Container(
+                            height: 300,
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                image: NetworkImage(car.imageUrl),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  car.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20,
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      onPressed: () async {
+                                        Helpers.showProgressDialog(context);
+                                        await carsController.deleteCar(
+                                          car.id,
+                                          car.imageUrl,
+                                        );
+                                        if (context.mounted) {
+                                          Navigator.pop(context);
+                                        }
+                                      },
+                                      icon: const Icon(Icons.delete),
+                                    ),
+                                    IconButton(
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (ctx) {
+                                            return ManageCar(car: car);
+                                          },
+                                        );
+                                      },
+                                      icon: const Icon(Icons.edit),
+                                    )
+                                  ],
+                                )
+                              ],
+                            ),
+                          )
+                        ],
                       ),
                     );
                   },

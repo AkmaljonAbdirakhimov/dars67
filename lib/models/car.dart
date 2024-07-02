@@ -3,13 +3,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Car {
   final String id;
   String name;
+  String imageUrl;
 
-  Car(this.id, this.name);
+  Car({
+    required this.id,
+    required this.name,
+    required this.imageUrl,
+  });
 
   factory Car.fromMap(QueryDocumentSnapshot query) {
     return Car(
-      query.id,
-      query['name'],
+      id: query.id,
+      name: query['name'],
+      imageUrl: query['imageUrl'],
     );
   }
 }
